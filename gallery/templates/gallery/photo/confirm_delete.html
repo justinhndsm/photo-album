@@ -1,0 +1,25 @@
+{% extends 'gallery/base.html' %}
+{% block title %}Delete {{ photo.title }}{% endblock %}
+
+{% block content %}
+<div style="max-width:520px;margin:3rem auto;">
+  <div class="card" style="padding:2.5rem;border-top:5px solid var(--danger);">
+    <h1 style="font-size:1.5rem;font-weight:800;margin-bottom:1rem;color:var(--danger);">⚠️ Delete Photo</h1>
+
+    <img src="{{ photo.image.url }}" alt="{{ photo.title }}"
+         style="width:100%;max-height:220px;object-fit:cover;border-radius:8px;margin-bottom:1.25rem;">
+
+    <p style="color:var(--muted);line-height:1.6;">
+      You are about to permanently delete <strong>"{{ photo.title }}"</strong> from
+      album <strong>"{{ photo.album.name }}"</strong>.
+      The image will also be removed from Cloudinary. This cannot be undone.
+    </p>
+
+    <form method="post" style="display:flex;gap:.75rem;margin-top:1.75rem;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Yes, delete it</button>
+      <a href="{% url 'album_detail' photo.album.pk %}" class="btn btn-outline">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'gallery/base.html' %}
+{% block title %}{{ album.name }}{% endblock %}
+
+{% block content %}
+<!-- Album Header -->
+<div class="page-header">
+  <div>
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.4rem;">
+      <h1>{{ album.name }}</h1>
+      <span class="badge {% if album.is_public %}badge-public{% else %}badge-private{% endif %}">
+        {% if album.is_public %}Public{% else %}Private{% endif %}
+      </span>
+    </div>
+    {% if album.description %}
+    <p style="color:var(--muted);font-size:.95rem;">{{ album.description }}</p>
+    {% endif %}
+    <p style="color:var(--muted);font-size:.8rem;margin-top:.4rem;">
+      Owned by <strong>{{ album.owner.username }}</strong> · Created {{ album.created_at|date:"M j, Y" }}
+    </p>
+  </div>
+
+  <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+    <a href="{% url 'album_list' %}" class="btn btn-outline btn-sm">← Albums</a>
+    {% if can_edit %}
+    <a href="{% url 'photo_create' album.pk %}" class="btn btn-primary btn-sm">+ Upload Photo</a>
+    <a href="{% url 'album_update' album.pk %}" class="btn btn-outline btn-sm">✏️ Edit Album</a>
+    <a href="{% url 'album_delete' album.pk %}" class="btn btn-danger btn-sm">🗑 Delete Album</a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Search within album -->
+<form method="get" style="margin-bottom:1.75rem;display:flex;gap:.75rem;max-width:500px;">
+  <input name="q" value="{{ query }}" placeholder="Search photos in this album…" class="form-control" style="margin:0;">
+  <button type="submit" class="btn btn-outline">Search</button>
+  {% if query %}<a href="{% url 'album_detail' album.pk %}" class="btn btn-outline">Clear</a>{% endif %}
+</form>
+
+{% if photos %}
+<div class="grid-4">
+  {% for photo in photos %}
+  <div class="card">
+    <div style="height:200px;overflow:hidden;position:relative;">
+      <img src="{{ photo.image.url }}" alt="{{ photo.title }}"
+           style="width:100%;height:100%;object-fit:cover;transition:transform .3s;"
+           onmouseover="this.style.transform='scale(1.06)'"
+           onmouseout="this.style.transform='scale(1)'">
+    </div>
+    <div style="padding:1rem;">
+      <h4 style="font-size:.95rem;font-weight:700;margin-bottom:.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+        {{ photo.title }}
+      </h4>
+      {% if photo.description %}
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:.6rem;">{{ photo.description|truncatewords:10 }}</p>
+      {% endif %}
+      <p style="font-size:.75rem;color:var(--muted);margin-bottom:.75rem;">{{ photo.uploaded_at|date:"M j, Y" }}</p>
+
+      {% if can_edit %}
+      <div style="display:flex;gap:.5rem;">
+        <a href="{% url 'photo_update' photo.pk %}" class="btn btn-outline btn-sm" style="flex:1;justify-content:center;">✏️ Edit</a>
+        <a href="{% url 'photo_delete' photo.pk %}" class="btn btn-danger btn-sm" style="flex:1;justify-content:center;">🗑</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if photos.has_other_pages %}
+<div class="pagination">
+  {% if photos.has_previous %}
+    <a href="?page={{ photos.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">&laquo; Prev</a>
+  {% endif %}
+  <span class="current">{{ photos.number }} / {{ photos.paginator.num_pages }}</span>
+  {% if photos.has_next %}
+    <a href="?page={{ photos.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Next &raquo;</a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<div class="empty-state">
+  <div style="font-size:4rem;margin-bottom:1rem;">🖼️</div>
+  <h3>No photos {% if query %}matching "{{ query }}"{% else %}yet{% endif %}</h3>
+  {% if can_edit and not query %}
+  <p style="margin-bottom:1.5rem;">Start by uploading your first photo.</p>
+  <a href="{% url 'photo_create' album.pk %}" class="btn btn-primary">Upload Photo</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

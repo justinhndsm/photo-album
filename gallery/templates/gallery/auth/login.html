@@ -1,0 +1,27 @@
+{% extends 'gallery/base.html' %}
+{% block title %}Log In{% endblock %}
+
+{% block content %}
+<div style="max-width:460px;margin:3rem auto;">
+  <div class="card" style="padding:2.5rem;">
+    <h1 style="font-size:1.6rem;font-weight:800;margin-bottom:.5rem;">Welcome back</h1>
+    <p style="color:var(--muted);margin-bottom:2rem;font-size:.9rem;">New here? <a href="{% url 'register' %}" style="color:var(--primary);font-weight:600;">Create an account</a></p>
+
+    <form method="post">
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}
+          {% for err in field.errors %}
+          <p style="color:var(--danger);font-size:.8rem;margin-top:.3rem;">{{ err }}</p>
+          {% endfor %}
+        {% endif %}
+      </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Log in</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

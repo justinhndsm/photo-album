@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Photo Albums{% endblock %} · SnapVault</title>
+  <style>
+    /* ── Reset & variables ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary:   #6366f1;
+      --primary-d: #4f46e5;
+      --danger:    #ef4444;
+      --success:   #22c55e;
+      --warn:      #f59e0b;
+      --bg:        #f1f5f9;
+      --surface:   #ffffff;
+      --border:    #e2e8f0;
+      --text:      #1e293b;
+      --muted:     #64748b;
+      --radius:    10px;
+      --shadow:    0 4px 24px rgba(0,0,0,.08);
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Navbar ────────────────────────────────────────────────── */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: .9rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 6px rgba(0,0,0,.06);
+    }
+    .nav-brand {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-decoration: none;
+      letter-spacing: -.5px;
+    }
+    .nav-brand span { color: var(--text); }
+    .nav-links { display: flex; gap: .5rem; margin-left: auto; align-items: center; }
+    .nav-links a, .nav-links button {
+      font-size: .875rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      padding: .45rem .9rem;
+      border-radius: 6px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .nav-links a:hover, .nav-links button:hover {
+      background: var(--bg); color: var(--text);
+    }
+    .nav-links .btn-primary {
+      background: var(--primary); color: #fff; padding: .45rem 1rem;
+    }
+    .nav-links .btn-primary:hover { background: var(--primary-d); color: #fff; }
+    .nav-user { font-size: .8rem; color: var(--muted); padding: .45rem .5rem; }
+
+    /* ── Main content ───────────────────────────────────────────── */
+    main { max-width: 1260px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* ── Flash messages ─────────────────────────────────────────── */
+    .messages { list-style: none; padding: 0; margin-bottom: 1.5rem; }
+    .messages li {
+      padding: .85rem 1.2rem;
+      border-radius: var(--radius);
+      margin-bottom: .5rem;
+      font-size: .9rem;
+      font-weight: 500;
+    }
+    .messages .success { background: #dcfce7; color: #15803d; border-left: 4px solid var(--success); }
+    .messages .error   { background: #fee2e2; color: #b91c1c; border-left: 4px solid var(--danger); }
+    .messages .warning { background: #fef9c3; color: #92400e; border-left: 4px solid var(--warn); }
+    .messages .info    { background: #e0f2fe; color: #0369a1; border-left: 4px solid #38bdf8; }
+
+    /* ── Reusable components ────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .6rem 1.2rem; border-radius: 8px; font-size: .875rem;
+      font-weight: 600; text-decoration: none; border: none; cursor: pointer;
+      transition: all .15s;
+    }
+    .btn-primary  { background: var(--primary); color: #fff; }
+    .btn-primary:hover  { background: var(--primary-d); }
+    .btn-danger   { background: var(--danger);  color: #fff; }
+    .btn-danger:hover   { background: #dc2626; }
+    .btn-outline  { background: none; border: 1.5px solid var(--border); color: var(--text); }
+    .btn-outline:hover  { border-color: var(--primary); color: var(--primary); }
+    .btn-sm { padding: .35rem .8rem; font-size: .8rem; }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(0,0,0,.12); }
+
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label { display: block; font-weight: 600; font-size: .875rem; margin-bottom: .4rem; color: var(--text); }
+    .form-control {
+      width: 100%; padding: .65rem .9rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px; font-size: .9rem; color: var(--text);
+      transition: border-color .15s;
+      background: var(--surface);
+    }
+    .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,.15); }
+    .form-check { display: flex; align-items: center; gap: .5rem; }
+    .form-check-input { width: 1rem; height: 1rem; cursor: pointer; accent-color: var(--primary); }
+
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; flex-wrap: wrap; gap: 1rem; }
+    .page-header h1 { font-size: 1.75rem; font-weight: 800; }
+
+    .badge {
+      display: inline-block; padding: .25rem .6rem;
+      border-radius: 999px; font-size: .75rem; font-weight: 600;
+    }
+    .badge-public  { background: #dcfce7; color: #15803d; }
+    .badge-private { background: #f1f5f9; color: var(--muted); }
+
+    .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+    .empty-state h3 { font-size: 1.2rem; margin-bottom: .5rem; color: var(--text); }
+
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.25rem; }
+
+    .pagination { display: flex; justify-content: center; gap: .5rem; margin-top: 2rem; align-items: center; }
+    .pagination a, .pagination span {
+      padding: .45rem .9rem; border-radius: 8px; font-size: .875rem; font-weight: 500;
+      text-decoration: none; color: var(--text); border: 1.5px solid var(--border);
+    }
+    .pagination a:hover { border-color: var(--primary); color: var(--primary); }
+    .pagination .current { background: var(--primary); color: #fff; border-color: var(--primary); }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+<nav>
+  <a class="nav-brand" href="{% url 'album_list' %}">Snap<span>Vault</span></a>
+  <div class="nav-links">
+    {% if user.is_authenticated %}
+      <a href="{% url 'album_list' %}">My Albums</a>
+      <a href="{% url 'album_create' %}" class="btn-primary">+ New Album</a>
+      <span class="nav-user">👤 {{ user.username }}{% if user.is_staff %} <em>(staff)</em>{% endif %}</span>
+      <form method="post" action="{% url 'logout' %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit">Log out</button>
+      </form>
+    {% else %}
+      <a href="{% url 'login' %}">Log in</a>
+      <a href="{% url 'register' %}" class="btn-primary">Sign up</a>
+    {% endif %}
+  </div>
+</nav>
+
+<main>
+  {% if messages %}
+  <ul class="messages">
+    {% for msg in messages %}
+    <li class="{{ msg.tags }}">{{ msg }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

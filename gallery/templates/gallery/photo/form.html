@@ -1,0 +1,44 @@
+{% extends 'gallery/base.html' %}
+{% block title %}{{ action }} Photo – {{ album.name }}{% endblock %}
+
+{% block content %}
+<div style="max-width:580px;margin:0 auto;">
+  <div class="page-header">
+    <div>
+      <p style="font-size:.85rem;color:var(--muted);margin-bottom:.25rem;">
+        <a href="{% url 'album_detail' album.pk %}" style="color:var(--primary);">{{ album.name }}</a>
+      </p>
+      <h1>{{ action }} Photo</h1>
+    </div>
+    <a href="{% url 'album_detail' album.pk %}" class="btn btn-outline btn-sm">← Cancel</a>
+  </div>
+
+  <div class="card" style="padding:2rem;">
+    {% if object and object.image %}
+    <div style="margin-bottom:1.5rem;">
+      <p style="font-size:.85rem;font-weight:600;color:var(--muted);margin-bottom:.5rem;">Current Image</p>
+      <img src="{{ object.image.url }}" alt="{{ object.title }}"
+           style="width:100%;max-height:260px;object-fit:cover;border-radius:8px;">
+    </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for err in field.errors %}
+        <p style="color:var(--danger);font-size:.8rem;margin-top:.3rem;">{{ err }}</p>
+        {% endfor %}
+      </div>
+      {% endfor %}
+
+      <div style="display:flex;gap:.75rem;margin-top:.5rem;">
+        <button type="submit" class="btn btn-primary">{{ action }} Photo</button>
+        <a href="{% url 'album_detail' album.pk %}" class="btn btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
